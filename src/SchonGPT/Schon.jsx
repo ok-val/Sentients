@@ -2,11 +2,12 @@
 
 import React, { useContext } from "react";
 import TopBar from "./TopBar";
-import { BotCore } from "./SchonContext";
+import { BotCore } from "./SchonContext-response";
 import { ScreenContainer } from "../common";
 import { PaperAirplaneIcon } from "@heroicons/react/16/solid";
 import InteractiveChat from "./InteractiveChat";
-import BotController from "./SchonContext";
+// import BotController from "./SchonContext";
+import BotController from "./SchonContext-response";
 
 const Schon = (props) => {
   return (
@@ -34,8 +35,11 @@ const ChatHistory = (props) => {
   const BotC = useContext(BotController);
 
   return (
-    <div id="chatscreen" className="h-full overflow-y-scroll flex flex-col">
-      {BotC.history?.map((item, index) => {
+    <div
+      id="chatscreen"
+      className="h-full overflow-y-scroll flex flex-col"
+    >
+      {BotC.context?.map((item, index) => {
         return <ChatBubble key={index} item={item} />;
       })}
     </div>
@@ -60,9 +64,7 @@ const ChatBubble = (props) => {
 
   return (
     <div className={tailwindString + "w-fit "}>
-      {props.item?.content.length > 0 ? (
-        <p>{props.item?.content[0].text.value}</p>
-      ) : null}
+      {<p>{props.item?.content || "null"}</p>}
     </div>
   );
 };
@@ -82,7 +84,9 @@ const InputBar = (props) => {
           var elem = document.getElementById("chatscreen");
           elem.scrollTop = elem.scrollHeight;
         }}
-        style={{ backgroundColor: BotC.loading ? "#22333b" : "#cad9e0" }}
+        style={{
+          backgroundColor: BotC.loading ? "#22333b" : "#cad9e0",
+        }}
       />
 
       <SendButton />

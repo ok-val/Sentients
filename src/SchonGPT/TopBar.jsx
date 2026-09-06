@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import BotController from "./SchonContext";
+import BotController from "./SchonContext-response";
 
 const TopBar = (props) => {
   const BotC = useContext(BotController);
@@ -19,7 +19,6 @@ const TopBar = (props) => {
   );
 };
 
-
 const ClearChatButton = (props) => {
   const BotC = useContext(BotController);
   return (
@@ -34,13 +33,21 @@ const ClearChatButton = (props) => {
 
 const FeedbackButton = (props) => {
   const BotC = useContext(BotController);
-  const color = BotC.feedback === 1 ? "bg-blue-munsell hover:bg-blue-munsell-900" : "bg-gunmetal hover:bg-gunmetal-100"
+  const color =
+    BotC.feedback === 1
+      ? "bg-blue-munsell hover:bg-blue-munsell-900"
+      : "bg-gunmetal hover:bg-gunmetal-100";
   return (
     <div
-      className={"flex flex-row self-center my-4 mx-2 text-center rounded-lg content-center px-2 items-center " + color}
+      className={
+        "flex flex-row self-center my-4 mx-2 text-center rounded-lg content-center px-2 items-center " +
+        color
+      }
       onClick={BotC.UpdateFeedback}
     >
-      <p className="font-semibold text-white">{BotC.feedback === 0 ? "Interview Mode" : "Feedback Mode"}</p>
+      <p className="font-semibold text-white">
+        {BotC.feedback === 0 ? "Interview Mode" : "Feedback Mode"}
+      </p>
     </div>
   );
 };

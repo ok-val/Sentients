@@ -1,10 +1,10 @@
-import response2 from "../_orientation/openAI-responseAPI/migrate-to-responses";
+// import response2 from "../_orientation/openAI-responseAPI/migrate-to-responses";
+import { BotCore } from "./SchonGPT/SchonContext-response";
 
 const TestApp = () => {
-  console.log(response2);
   return (
     <>
-      <div>Hello world</div>
+      <BotCore />
     </>
   );
 };
