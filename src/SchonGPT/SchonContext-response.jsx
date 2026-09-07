@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect } from "react";
 import OpenAI from "openai";
+import useOpenAIResponses from "../hooks/useOpenAIResponses";
 
 const BotController = createContext(null);
 
@@ -9,11 +10,12 @@ const ASSISTANTS = {
 };
 
 export const BotCore = (props) => {
+  const savedContextKey = "Schon_Context";
+  const modelName = "gpt-5.6-luna";
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [chatMode, setChatMode] = useState(0); // 0 is history, 1 is interactive chat
+  // const [chatMode, setChatMode] = useState(0); // 0 is history, 1 is interactive chat
 
-  const [feedback, setFeedback] = useState(false); // 0 interview mode, 1 feedback mode
+  const [feedbackMode, setFeedbackMode] = useState(false); // 0 interview mode, 1 feedback mode
   const [message, setMessage] = useState("");
 
   const initContext = [
@@ -23,26 +25,10 @@ export const BotCore = (props) => {
         "Hello. I can help you clarify your design intentions. Please describe what you are working on.",
     },
   ];
-
-  const [context, setContext] = useState(initContext);
-
-  const openai = new OpenAI({
-    apiKey: import.meta.env.VITE_OPENAI_KEY,
-    dangerouslyAllowBrowser: true,
-  });
-
-  useEffect(() => {
-    // Load twice on mount -- be careful
-    // localStorage only returns strings, needs manual conversion
-    const savedContext =
-      JSON.parse(localStorage.getItem("Schon_Context")) != null || null;
-    // Convo always starts with Chatbot turn
-    if (savedContext?.length > 1) {
-      setContext(JSON.parse(savedContext));
-    } else {
-      localStorage.setItem("Schon_Context", JSON.stringify(context));
-    }
-  }, []);
+  const { context, error, isLoading, sendMessage } = useOpenAIResponses(
+    initContext,
+    savedContextKey,
+  );
 
   // Refactor to useRef for DOM manipulation
   // var elem = document.getElementById("chatscreen");
@@ -53,62 +39,49 @@ export const BotCore = (props) => {
   // }, [history]);
 
   function UpdateFeedback() {
-    setFeedback(!feedback);
+    setFeedbackMode(!feedbackMode);
   }
 
-  async function useOpenAIResponses(inputContext) {
-    try {
-      const response = await openai.responses.create({
-        model: "gpt-5.6-luna",
-        instructions: "You are a helpful assistant.",
-        input: inputContext,
-        store: true,
-      });
-      if (response.status >= 400) {
-        console.log("server err");
-        throw new Error("400 server error");
-      }
-      const outputContext = [
-        ...inputContext,
-        { role: "assistant", content: response.output_text },
-      ];
-      setContext(outputContext);
-      // localStorage.setItem("Schon_Context", outputContext);
-      // console.log(JSON.parse(localStorage.getItem("Schon_Context")));
-    } catch (error) {
-      console.log(error.message);
-      setError(error);
-    }
-  }
+  // async function useOpenAIResponses(
+  //   inputContext,
+  //   modelName,
+  //   instructions,
+  //   role = "assistant",
+  // ) {
+  //   const [outputContext, setOutputContext] = useState(null);
+  //   const [error, setError] = useState(null);
+  //   const [isLoading, setIsLoading] = useState(true);
 
-  async function SendMessage() {
+  //   try {
+  //     const response = await openai.responses.create({
+  //       model: "gpt-5.6-luna",
+  //       instructions: "You are a helpful assistant.",
+  //       input: inputContext,
+  //       store: true,
+  //     });
+  //     if (response.status >= 400) {
+  //       throw new Error("400 server error");
+  //     }
+  //     setOutputContext([
+  //       ...inputContext,
+  //       { role: "assistant", content: response.output_text },
+  //     ]);
+  //   } catch (error) {
+  //     // console.log(error.message);
+  //     setError(error);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  //   return { outputContext, error, isLoading };
+  // }
+
+  async function handleSendMessage() {
     if (message.trim() != "") {
-      // Create new message on thread
-      // Fetch Thread Messages
+      sendMessage(message);
 
-      const inputThread = context.concat({
-        role: "user",
-        content: message.trim(),
-      });
-
-      // try {
-      //   const response = await openai.responses.create({
-      //     model: "gpt-5.6-luna",
-      //     instructions: "",
-      //     input: inputThread,
-      //     store: true,
-      //   });
-      //   if (response.status >= 400) {
-      //     throw new Error("server err");
-      //   }
-      // } catch (error) {
-      //   setError(error);
-      // } finally {
-      //   SchonResponse();
-      //   setMessage("");
-      // }
-
-      useOpenAIResponses(inputThread);
+      localStorage.setItem(savedContextKey, JSON.stringify(context));
+      // console.log(JSON.parse(localStorage.getItem("Schon_Context")));
+      setMessage("");
     }
   }
 
@@ -128,33 +101,31 @@ export const BotCore = (props) => {
       });
   }
 
-  function ToggleChatMode() {
-    if (chatMode === 0) setChatMode(1);
-    else if (chatMode === 1) setChatMode(0);
-  }
+  // function ToggleChatMode() {
+  //   if (chatMode === 0) setChatMode(1);
+  //   else if (chatMode === 1) setChatMode(0);
+  // }
 
   function ClearChatHistory() {
-    setThread(null);
-    setHistory(null);
-    localStorage.removeItem("Schon_ThreadID");
-    CreateThread();
+    localStorage.removeItem(savedContextKey);
+    setContext(initContext);
   }
 
   return (
     <BotController.Provider
       value={{
-        //state
-        feedback,
+        // state
+        // feedback,
         context,
         message,
-        chatMode,
+        // chatMode,
         loading,
 
         //methods
         UpdateFeedback,
         setMessage,
-        SendMessage,
-        ToggleChatMode,
+        handleSendMessage,
+        // ToggleChatMode,
         ClearChatHistory,
       }}
     >

@@ -78,7 +78,7 @@ const InputBar = (props) => {
         className="h-10 w-full mr-2 px-2 rounded-lg"
         value={BotC.message}
         onChange={(e) => BotC.setMessage(e.target.value)}
-        onSubmitCapture={BotC.SendMessage}
+        onSubmitCapture={BotC.handleSendMessage}
         disabled={BotC.loading}
         onFocus={() => {
           var elem = document.getElementById("chatscreen");
@@ -99,7 +99,7 @@ const SendButton = (props) => {
 
   return (
     <PaperAirplaneIcon
-      onClick={BotC.SendMessage}
+      onClick={BotC.handleSendMessage}
       color="#475034"
       className="rounded-lg w-7 h-7 hover:bg-slate-200"
     />
