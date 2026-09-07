@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect } from "react";
-import OpenAI from "openai";
+// import OpenAI from "openai";
 import useOpenAIResponses from "../hooks/useOpenAIResponses";
 
 const BotController = createContext(null);
@@ -15,7 +15,7 @@ export const BotCore = (props) => {
   const [loading, setLoading] = useState(false);
   // const [chatMode, setChatMode] = useState(0); // 0 is history, 1 is interactive chat
 
-  const [feedbackMode, setFeedbackMode] = useState(false); // 0 interview mode, 1 feedback mode
+  const [feedbackMode, setFeedbackMode] = useState(false); // false interview mode, true feedback mode
   const [message, setMessage] = useState("");
 
   const initContext = [
@@ -25,10 +25,14 @@ export const BotCore = (props) => {
         "Hello. I can help you clarify your design intentions. Please describe what you are working on.",
     },
   ];
-  const { context, error, isLoading, sendMessage } = useOpenAIResponses(
-    initContext,
-    savedContextKey,
-  );
+  const {
+    context,
+    error,
+    isLoading,
+    sendMessage,
+    clearChat,
+    setLocalContext,
+  } = useOpenAIResponses(initContext, savedContextKey);
 
   // Refactor to useRef for DOM manipulation
   // var elem = document.getElementById("chatscreen");
@@ -38,48 +42,18 @@ export const BotCore = (props) => {
   //   }
   // }, [history]);
 
-  function UpdateFeedback() {
+  function handleFeedbackMode() {
     setFeedbackMode(!feedbackMode);
   }
 
-  // async function useOpenAIResponses(
-  //   inputContext,
-  //   modelName,
-  //   instructions,
-  //   role = "assistant",
-  // ) {
-  //   const [outputContext, setOutputContext] = useState(null);
-  //   const [error, setError] = useState(null);
-  //   const [isLoading, setIsLoading] = useState(true);
-
-  //   try {
-  //     const response = await openai.responses.create({
-  //       model: "gpt-5.6-luna",
-  //       instructions: "You are a helpful assistant.",
-  //       input: inputContext,
-  //       store: true,
-  //     });
-  //     if (response.status >= 400) {
-  //       throw new Error("400 server error");
-  //     }
-  //     setOutputContext([
-  //       ...inputContext,
-  //       { role: "assistant", content: response.output_text },
-  //     ]);
-  //   } catch (error) {
-  //     // console.log(error.message);
-  //     setError(error);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  //   return { outputContext, error, isLoading };
-  // }
+  function handleClearChat() {
+    clearChat();
+  }
 
   async function handleSendMessage() {
     if (message.trim() != "") {
       sendMessage(message);
-
-      localStorage.setItem(savedContextKey, JSON.stringify(context));
+      setLocalContext(savedContextKey, context);
       // console.log(JSON.parse(localStorage.getItem("Schon_Context")));
       setMessage("");
     }
@@ -106,33 +80,27 @@ export const BotCore = (props) => {
   //   else if (chatMode === 1) setChatMode(0);
   // }
 
-  function ClearChatHistory() {
-    localStorage.removeItem(savedContextKey);
-    setContext(initContext);
-  }
-
   return (
     <BotController.Provider
       value={{
         // state
-        // feedback,
+        feedbackMode,
         context,
         message,
         // chatMode,
         loading,
 
         //methods
-        UpdateFeedback,
+        handleFeedbackMode,
         setMessage,
         handleSendMessage,
         // ToggleChatMode,
-        ClearChatHistory,
+        handleClearChat,
       }}
     >
       {props.children}
     </BotController.Provider>
   );
-  // return <></>;
 };
 
 export default BotController;

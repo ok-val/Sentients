@@ -48,7 +48,6 @@ export default function useOpenAIResponses(
       if (response.status >= 400) {
         throw new Error("400 server error");
       }
-      console.log("good");
       setContext([
         ...input,
         { role: role, content: response.output_text },
@@ -59,6 +58,11 @@ export default function useOpenAIResponses(
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const clearChat = () => {
+    localStorage.removeItem(savedContextKey);
+    setContext(initContext);
   };
 
   function getLocalContext(key) {
@@ -79,6 +83,13 @@ export default function useOpenAIResponses(
     localStorage.setItem("Schon_Context", JSON.stringify(context));
   }
 
-  return { context, error, isLoading, sendMessage, setLocalContext };
+  return {
+    context,
+    error,
+    isLoading,
+    sendMessage,
+    clearChat,
+    setLocalContext,
+  };
 }
 // Could you tell me a fun fact?

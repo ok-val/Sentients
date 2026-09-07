@@ -24,7 +24,7 @@ const ClearChatButton = (props) => {
   return (
     <div
       className="flex flex-row self-center my-4 text-center text-white bg-raspberry hover:bg-slate-400 rounded-lg content-center px-2 items-center "
-      onClick={BotC.ClearChatHistory}
+      onClick={BotC.handleClearChat}
     >
       <p className="font-semibold ">Clear Chat</p>
     </div>
@@ -43,10 +43,10 @@ const FeedbackButton = (props) => {
         "flex flex-row self-center my-4 mx-2 text-center rounded-lg content-center px-2 items-center " +
         color
       }
-      onClick={BotC.UpdateFeedback}
+      onClick={BotC.handleFeedbackMode}
     >
       <p className="font-semibold text-white">
-        {BotC.feedback === 0 ? "Interview Mode" : "Feedback Mode"}
+        {BotC.feedbackMode ? "Interview Mode" : "Feedback Mode"}
       </p>
     </div>
   );
