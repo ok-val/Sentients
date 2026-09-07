@@ -43,7 +43,7 @@ const FeedbackButton = (props) => {
         "flex flex-row self-center my-4 mx-2 text-center rounded-lg content-center px-2 items-center " +
         color
       }
-      onClick={BotC.handleFeedbackMode}
+      onClick={BotC.handleFeedbackToggle}
     >
       <p className="font-semibold text-white">
         {BotC.feedbackMode ? "Interview Mode" : "Feedback Mode"}

@@ -1,18 +1,13 @@
 import { createContext, useState, useEffect } from "react";
 // import OpenAI from "openai";
 import useOpenAIResponses from "../hooks/useOpenAIResponses";
+import { schonInstructions } from "../instructions-prompts/schon-instructions";
 
 const BotController = createContext(null);
-
-const ASSISTANTS = {
-  Interview: import.meta.env.VITE_SCHON_INTERVIEW,
-  Feedback: import.meta.env.VITE_SCHON_FEEDBACK,
-};
 
 export const BotCore = (props) => {
   const savedContextKey = "Schon_Context";
   const modelName = "gpt-5.6-luna";
-  const [loading, setLoading] = useState(false);
   // const [chatMode, setChatMode] = useState(0); // 0 is history, 1 is interactive chat
 
   const [feedbackMode, setFeedbackMode] = useState(false); // false interview mode, true feedback mode
@@ -25,14 +20,9 @@ export const BotCore = (props) => {
         "Hello. I can help you clarify your design intentions. Please describe what you are working on.",
     },
   ];
-  const {
-    context,
-    error,
-    isLoading,
-    sendMessage,
-    clearChat,
-    setLocalContext,
-  } = useOpenAIResponses(initContext, savedContextKey);
+
+  const { context, error, loading, sendMessage, clearContext } =
+    useOpenAIResponses(initContext, savedContextKey);
 
   // Refactor to useRef for DOM manipulation
   // var elem = document.getElementById("chatscreen");
@@ -42,43 +32,34 @@ export const BotCore = (props) => {
   //   }
   // }, [history]);
 
-  function handleFeedbackMode() {
+  function handleFeedbackToggle() {
     setFeedbackMode(!feedbackMode);
   }
 
   function handleClearChat() {
-    clearChat();
+    clearContext();
   }
 
-  async function handleSendMessage() {
+  function handleSendMessage() {
     if (message.trim() != "") {
-      sendMessage(message);
-      setLocalContext(savedContextKey, context);
+      sendMessage(
+        message,
+        feedbackMode
+          ? schonInstructions.feedback
+          : schonInstructions.interview,
+        modelName,
+      );
       // console.log(JSON.parse(localStorage.getItem("Schon_Context")));
       setMessage("");
     }
-  }
-
-  async function SchonResponse() {
-    setLoading(true);
-
-    openai.beta.threads.runs
-      .createAndPoll(thread.id, {
-        assistant_id:
-          feedback === 1 ? ASSISTANTS.Feedback : ASSISTANTS.Interview,
-      })
-      .then(() => {
-        FetchThreadMessages();
-      })
-      .finally(() => {
-        setLoading(false);
-      });
   }
 
   // function ToggleChatMode() {
   //   if (chatMode === 0) setChatMode(1);
   //   else if (chatMode === 1) setChatMode(0);
   // }
+
+  if (error) return <p>Oops, something went wrong: {error.message}</p>;
 
   return (
     <BotController.Provider
@@ -87,15 +68,15 @@ export const BotCore = (props) => {
         feedbackMode,
         context,
         message,
-        // chatMode,
         loading,
+        // chatMode,
 
         //methods
-        handleFeedbackMode,
+        handleFeedbackToggle,
         setMessage,
         handleSendMessage,
-        // ToggleChatMode,
         handleClearChat,
+        // ToggleChatMode,
       }}
     >
       {props.children}

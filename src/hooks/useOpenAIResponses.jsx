@@ -4,12 +4,10 @@ import OpenAI from "openai";
 export default function useOpenAIResponses(
   initContext,
   savedContextKey,
-  instructions = "You are a helpful assistant.",
-  role = "assistant",
 ) {
   const [context, setContext] = useState(initContext);
   const [error, setError] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const openai = new OpenAI({
     apiKey: import.meta.env.VITE_OPENAI_KEY,
@@ -30,9 +28,9 @@ export default function useOpenAIResponses(
     }
   }, []);
 
-  const sendMessage = async (message) => {
-    console.log("sendMessage fired");
-    setIsLoading(true);
+  const sendMessage = async (message, instructions, modelName) => {
+    // console.log(instructions);
+    setLoading(true);
     const input = context.concat({
       role: "user",
       content: message.trim(),
@@ -48,19 +46,21 @@ export default function useOpenAIResponses(
       if (response.status >= 400) {
         throw new Error("400 server error");
       }
-      setContext([
+      const output = [
         ...input,
-        { role: role, content: response.output_text },
-      ]);
+        { role: "assistant", content: response.output_text },
+      ];
+      setContext(output);
+      setLocalContext(savedContextKey, output);
     } catch (error) {
       console.log(error.message);
       setError(error);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const clearChat = () => {
+  const clearContext = () => {
     localStorage.removeItem(savedContextKey);
     setContext(initContext);
   };
@@ -86,10 +86,9 @@ export default function useOpenAIResponses(
   return {
     context,
     error,
-    isLoading,
+    loading,
     sendMessage,
-    clearChat,
+    clearContext,
     setLocalContext,
   };
 }
-// Could you tell me a fun fact?
