@@ -5,8 +5,6 @@ import TopBar from "./TopBar";
 import { BotCore } from "./SchonContext-response";
 import { ScreenContainer } from "../common";
 import { PaperAirplaneIcon } from "@heroicons/react/16/solid";
-// import InteractiveChat from "./InteractiveChat";
-// import BotController from "./SchonContext";
 import BotController from "./SchonContext-response";
 
 const Schon = (props) => {
@@ -38,7 +36,6 @@ const ChatScreen = (props) => {
 
   return (
     <div className="flex flex-col h-[90%] w-full bg-white py-3 px-3 justify-stretch max-md:w-full max-md:h-full">
-      {/* {BotC.chatMode == 1 ? <InteractiveChat /> : <ChatHistory />} */}
       <ChatHistory forwardRef={bottomAnchorRef} />
       <InputBar handleScrollToBottom={scrollToBottom} />
     </div>

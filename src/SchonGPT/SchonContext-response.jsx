@@ -1,5 +1,4 @@
 import { createContext, useState, useEffect } from "react";
-// import OpenAI from "openai";
 import useOpenAIResponses from "../hooks/useOpenAIResponses";
 import { schonInstructions } from "../prompts/schon-instructions";
 
@@ -8,7 +7,6 @@ const BotController = createContext(null);
 export const BotCore = (props) => {
   const savedContextKey = "Schon_Context";
   const modelName = "gpt-5.6-luna";
-  // const [chatMode, setChatMode] = useState(0); // 0 is history, 1 is interactive chat
 
   const [feedbackMode, setFeedbackMode] = useState(false); // false interview mode, true feedback mode
   const [message, setMessage] = useState("");
@@ -53,11 +51,6 @@ export const BotCore = (props) => {
     }
   }
 
-  // function ToggleChatMode() {
-  //   if (chatMode === 0) setChatMode(1);
-  //   else if (chatMode === 1) setChatMode(0);
-  // }
-
   if (error) return <p>Oops, something went wrong: {error.message}</p>;
 
   return (
@@ -68,14 +61,12 @@ export const BotCore = (props) => {
         context,
         message,
         loading,
-        // chatMode,
 
         //methods
         handleFeedbackToggle,
         setMessage,
         handleSendMessage,
         handleClearChat,
-        // ToggleChatMode,
       }}
     >
       {props.children}
