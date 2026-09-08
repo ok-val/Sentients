@@ -1,11 +1,11 @@
 // Root for Schon
 
-import React, { useContext } from "react";
+import { useContext, useEffect, useRef } from "react";
 import TopBar from "./TopBar";
 import { BotCore } from "./SchonContext-response";
 import { ScreenContainer } from "../common";
 import { PaperAirplaneIcon } from "@heroicons/react/16/solid";
-import InteractiveChat from "./InteractiveChat";
+// import InteractiveChat from "./InteractiveChat";
 // import BotController from "./SchonContext";
 import BotController from "./SchonContext-response";
 
@@ -22,18 +22,31 @@ const Schon = (props) => {
 
 const ChatScreen = (props) => {
   const BotC = useContext(BotController);
+  const bottomAnchorRef = useRef(null);
+
+  function scrollToBottom() {
+    bottomAnchorRef.current.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "center",
+    });
+  }
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [BotC.context]);
+
   return (
     <div className="flex flex-col h-[90%] w-full bg-white py-3 px-3 justify-stretch max-md:w-full max-md:h-full">
-      {BotC.chatMode == 1 ? <InteractiveChat /> : <ChatHistory />}
-
-      <InputBar />
+      {/* {BotC.chatMode == 1 ? <InteractiveChat /> : <ChatHistory />} */}
+      <ChatHistory forwardRef={bottomAnchorRef} />
+      <InputBar handleScrollToBottom={scrollToBottom} />
     </div>
   );
 };
 
 const ChatHistory = (props) => {
   const BotC = useContext(BotController);
-
   return (
     <div
       id="chatscreen"
@@ -42,6 +55,7 @@ const ChatHistory = (props) => {
       {BotC.context?.map((item, index) => {
         return <ChatBubble key={index} item={item} />;
       })}
+      <div ref={props.forwardRef} />
     </div>
   );
 };
@@ -64,7 +78,7 @@ const ChatBubble = (props) => {
 
   return (
     <div className={tailwindString + "w-fit "}>
-      {<p>{props.item?.content || "null"}</p>}
+      {<p>{props.item?.content}</p>}
     </div>
   );
 };
@@ -80,10 +94,7 @@ const InputBar = (props) => {
         onChange={(e) => BotC.setMessage(e.target.value)}
         onSubmitCapture={BotC.handleSendMessage}
         disabled={BotC.loading}
-        onFocus={() => {
-          var elem = document.getElementById("chatscreen");
-          elem.scrollTop = elem.scrollHeight;
-        }}
+        onFocus={props.handleScrollToBottom}
         style={{
           backgroundColor: BotC.loading ? "#22333b" : "#cad9e0",
         }}

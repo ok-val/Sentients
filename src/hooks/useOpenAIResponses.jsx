@@ -38,7 +38,7 @@ export default function useOpenAIResponses(
 
     try {
       const response = await openai.responses.create({
-        model: "gpt-5.6-luna",
+        model: modelName,
         instructions: instructions,
         input: input,
         store: true,
@@ -80,7 +80,7 @@ export default function useOpenAIResponses(
   }
 
   function setLocalContext(key, context) {
-    localStorage.setItem("Schon_Context", JSON.stringify(context));
+    localStorage.setItem(key, JSON.stringify(context));
   }
 
   return {
@@ -89,6 +89,5 @@ export default function useOpenAIResponses(
     loading,
     sendMessage,
     clearContext,
-    setLocalContext,
   };
 }

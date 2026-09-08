@@ -1,7 +1,7 @@
 import { createContext, useState, useEffect } from "react";
 // import OpenAI from "openai";
 import useOpenAIResponses from "../hooks/useOpenAIResponses";
-import { schonInstructions } from "../instructions-prompts/schon-instructions";
+import { schonInstructions } from "../prompts/schon-instructions";
 
 const BotController = createContext(null);
 
@@ -24,13 +24,12 @@ export const BotCore = (props) => {
   const { context, error, loading, sendMessage, clearContext } =
     useOpenAIResponses(initContext, savedContextKey);
 
-  // Refactor to useRef for DOM manipulation
+  // Refactored with useRef, handled in ChatScreen
   // var elem = document.getElementById("chatscreen");
   // useEffect(() => {
-  //   if (elem) {
-  //     elem.scrollTop = elem?.scrollHeight;
-  //   }
-  // }, [history]);
+  //   elem?.scrollTo({ top: elem.scrollHeight, behavior: "smooth" });
+  //   // elem.scrollTop = elem?.scrollHeight;
+  // }, [context]);
 
   function handleFeedbackToggle() {
     setFeedbackMode(!feedbackMode);
