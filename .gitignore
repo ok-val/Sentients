@@ -41,3 +41,9 @@ dist-ssr
 
 src/openaikey.js
 .env
+
+# Val
+_orientation/
+.vscode/
+.prettierignore
+.prettierrc

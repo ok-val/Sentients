@@ -1,12 +1,11 @@
 // Root for Schon
 
-import React, { useContext } from "react";
+import { useContext, useEffect, useRef } from "react";
 import TopBar from "./TopBar";
-import { BotCore } from "./SchonContext";
+import { BotCore } from "./SchonContext-response";
 import { ScreenContainer } from "../common";
 import { PaperAirplaneIcon } from "@heroicons/react/16/solid";
-import InteractiveChat from "./InteractiveChat";
-import BotController from "./SchonContext";
+import BotController from "./SchonContext-response";
 
 const Schon = (props) => {
   return (
@@ -21,23 +20,39 @@ const Schon = (props) => {
 
 const ChatScreen = (props) => {
   const BotC = useContext(BotController);
+  const bottomAnchorRef = useRef(null);
+
+  function scrollToBottom() {
+    bottomAnchorRef.current.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "center",
+    });
+  }
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [BotC.context]);
+
   return (
     <div className="flex flex-col h-[90%] w-full bg-white py-3 px-3 justify-stretch max-md:w-full max-md:h-full">
-      {BotC.chatMode == 1 ? <InteractiveChat /> : <ChatHistory />}
-
-      <InputBar />
+      <ChatHistory forwardRef={bottomAnchorRef} />
+      <InputBar handleScrollToBottom={scrollToBottom} />
     </div>
   );
 };
 
 const ChatHistory = (props) => {
   const BotC = useContext(BotController);
-
   return (
-    <div id="chatscreen" className="h-full overflow-y-scroll flex flex-col">
-      {BotC.history?.map((item, index) => {
+    <div
+      id="chatscreen"
+      className="h-full overflow-y-scroll flex flex-col"
+    >
+      {BotC.context?.map((item, index) => {
         return <ChatBubble key={index} item={item} />;
       })}
+      <div ref={props.forwardRef} />
     </div>
   );
 };
@@ -60,9 +75,7 @@ const ChatBubble = (props) => {
 
   return (
     <div className={tailwindString + "w-fit "}>
-      {props.item?.content.length > 0 ? (
-        <p>{props.item?.content[0].text.value}</p>
-      ) : null}
+      {<p>{props.item?.content}</p>}
     </div>
   );
 };
@@ -76,13 +89,12 @@ const InputBar = (props) => {
         className="h-10 w-full mr-2 px-2 rounded-lg"
         value={BotC.message}
         onChange={(e) => BotC.setMessage(e.target.value)}
-        onSubmitCapture={BotC.SendMessage}
+        onSubmitCapture={BotC.handleSendMessage}
         disabled={BotC.loading}
-        onFocus={() => {
-          var elem = document.getElementById("chatscreen");
-          elem.scrollTop = elem.scrollHeight;
+        onFocus={props.handleScrollToBottom}
+        style={{
+          backgroundColor: BotC.loading ? "#22333b" : "#cad9e0",
         }}
-        style={{ backgroundColor: BotC.loading ? "#22333b" : "#cad9e0" }}
       />
 
       <SendButton />
@@ -95,7 +107,7 @@ const SendButton = (props) => {
 
   return (
     <PaperAirplaneIcon
-      onClick={BotC.SendMessage}
+      onClick={BotC.handleSendMessage}
       color="#475034"
       className="rounded-lg w-7 h-7 hover:bg-slate-200"
     />
